@@ -132,7 +132,25 @@ class SequentialAttention(tf.Module):
 
   @tf.Module.with_name_scope
   def _k_hot_mask(self, indices, depth, dtype=tf.float32):
-    return tf.math.reduce_sum(tf.one_hot(indices, depth, dtype=dtype), 0)
+    """Convert selected indices to k-hot mask (multi-hot encoding).
+
+    I have tf.shape(indices)[0] ones, add the first 1 to the bucket at
+    index-1, add the 2nd 1 to the bucket at index-3, etc.
+
+    Args:
+      indices: Shape [k] index tensor indicating which positions should be set
+        to 1
+      depth: Length of the output mask (total number of candidates)
+      dtype: Output data type
+
+    Returns:
+      Shape [depth] mask where positions in indices are set to 1, others to 0
+    """
+    return tf.math.unsorted_segment_sum(
+        tf.ones(tf.shape(indices)[0], dtype=dtype),
+        indices,
+        num_segments=depth,
+    )
 
   @tf.Module.with_name_scope
   def _softmax_with_mask(self, logits, mask):
