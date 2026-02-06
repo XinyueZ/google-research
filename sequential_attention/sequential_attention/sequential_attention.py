@@ -134,8 +134,9 @@ class SequentialAttention(tf.Module):
   def _k_hot_mask(self, indices, depth, dtype=tf.float32):
     """Convert selected indices to k-hot mask (multi-hot encoding).
 
-    I have tf.shape(indices)[0] ones, add the first 1 to the bucket at
-    index-1, add the 2nd 1 to the bucket at index-3, etc.
+    Creates a k-hot mask by counting occurrences of each index value.
+    For each element in indices, increments the corresponding position
+    in the output mask.
 
     Args:
       indices: Shape [k] index tensor indicating which positions should be set
